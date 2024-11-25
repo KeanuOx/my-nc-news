@@ -7,6 +7,7 @@ const db = require("../db/connection.js")
 const seed = require("../db/seeds/seed.js")
 const data = require("../db/data/test-data")
 
+
 /* Set up your beforeEach & afterAll functions here */
 beforeEach(() => {
   return seed(data)
@@ -26,3 +27,23 @@ describe("GET /api", () => {
       });
   });
 });
+describe("GET /api/topics", () => {
+  test("200: Responds with an object of all the topics", () => {
+    return request(app)
+      .get("/api/topics")
+      .expect(200)
+      .then(({body}) => {
+        expect(body.result).toEqual(data.topicData)
+      })
+  })
+})
+describe("Not found error", () =>{
+  test('404: responds with not found', async () => {
+    return request(app)
+    .get("/api/topi")
+    .expect(404)
+    .then((response) =>{
+      expect(response.text).toBe("{\"msg\":\"Route not found\"}")
+    })
+  });
+})
