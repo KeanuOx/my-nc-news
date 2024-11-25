@@ -1,7 +1,7 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
-
+You will need to create a .env.development folder and a .env.test folder in order to connect to the databases in this program.
+In those files, you will need to add PGDATABASE=development_data or PGDATABASE=test-data.
 
 
 --- 
