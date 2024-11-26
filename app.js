@@ -1,10 +1,11 @@
 const express = require("express")
 const endpoint = require("./endpoints.json")
-const { getTopics, getArticleById } = require("./controller.js")
+const { getTopics, getArticleById, getArticles } = require("./controller.js")
 app = express()
 const {
     handleCustomErrors,
-    handleServerErrors
+    handleServerErrors,
+    handlePSQLErrors
   } = require("./errors.js");
 
 
@@ -16,16 +17,19 @@ app.get("/api/topics", getTopics)
 
 app.get("/api/articles/:article_id", getArticleById)
 
+app.get("/api/articles", getArticles)
+
 
 
 
 app.all('/*', (req,res) =>{
-    res.status(404).send({ msg: 'Route not found'})
+    res.status(404).send({ msg: 'Not found'})
 })
 
-
+app.use(handlePSQLErrors);
 app.use(handleCustomErrors);
 app.use(handleServerErrors);
+
 
 
 module.exports= app

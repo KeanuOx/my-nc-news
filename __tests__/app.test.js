@@ -6,6 +6,7 @@ const app = require("../app.js")
 const db = require("../db/connection.js")
 const seed = require("../db/seeds/seed.js")
 const data = require("../db/data/test-data")
+const sort = require("jest-sorted")
 
 
 /* Set up your beforeEach & afterAll functions here */
@@ -44,22 +45,23 @@ describe("GET /api/articles/:article_id", () =>{
     .expect(200)
     .then(({body}) => {
       const article = body.article
-      expect(article.title).toBe("Living in the shadow of a great man")
-      expect(article.topic).toBe("mitch")
-      expect(article.author).toBe("butter_bridge")
-      expect(article.body).toBe("I find this existence challenging")
+      expect(article.article_id).toBe(1)
+      expect(article.title).toBe(data.articleData[0].title)
+      expect(article.topic).toBe(data.articleData[0].topic)
+      expect(article.author).toBe(data.articleData[0].author)
+      expect(article.body).toBe(data.articleData[0].body)
       expect(article.created_at).toBe("2020-07-09T20:11:00.000Z")
-      expect(article.votes).toBe(100)
-      expect(article.article_img_url).toBe("https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700")
+      expect(article.votes).toBe(data.articleData[0].votes)
+      expect(article.article_img_url).toBe(data.articleData[0].article_img_url)
      })
   })
   test("400: Responds with an error message when the article id is invalid", () =>{
     return request(app)
-    .get("/api/articles/banana")
+    .get("/api/articles/invalid_id")
     .expect(400)
     .then(({body}) => {
       const error = body
-      expect(error.msg).toEqual("Invalid article id")
+      expect(error.msg).toEqual("Bad Request")
     })
   })
   test("404: Responds with an error message when the article provided doesn't exist", () =>{
@@ -68,19 +70,55 @@ describe("GET /api/articles/:article_id", () =>{
     .expect(404)
     .then(({body}) =>{
       const error = body
-      expect(error.msg).toBe("Couldn't find article")
+      expect(error.msg).toBe("Not found")
     })
   })
   })
 
+describe("GET /api/articles", ()=>{
+  test("200: Responds with an array of all the articles with all the correct properties, sorted by the date created in descending order", ()=>{
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then(({body}) =>{
+      const articles = body.articles
+      expect(articles).toHaveLength(13)
+      articles.forEach((article)=>{
+        expect(article).toMatchObject({
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: expect.any(Number),
+          topic: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: expect.any(Number),
 
-describe("Not found error", () =>{
+        })
+      })
+      expect(articles).toBeSortedBy("created_at", { descending: true, })
+    })
+  })
+})
+
+
+
+
+
+
+
+
+
+
+
+
+  describe("Not found error", () =>{
   test("404: responds with not found when the given path isn't available", () => {
     return request(app)
     .get("/api/topi")
     .expect(404)
     .then((response) => {
-      expect(response.body).toEqual({msg: "Route not found"})
+      expect(response.body).toEqual({msg: "Not found"})
     })
   });
 })
