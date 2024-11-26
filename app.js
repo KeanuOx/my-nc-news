@@ -1,6 +1,6 @@
 const express = require("express")
 const endpoint = require("./endpoints.json")
-const { getTopics } = require("./controller.js")
+const { getTopics, getArticleById } = require("./controller.js")
 app = express()
 const {
     handleCustomErrors,
@@ -14,7 +14,7 @@ app.get("/api", (req, res) => {
 
 app.get("/api/topics", getTopics)
 
-
+app.get("/api/articles/:article_id", getArticleById)
 
 
 
