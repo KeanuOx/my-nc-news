@@ -6,3 +6,15 @@ exports.selectTopics = () => {
         return rows
     })
 }
+
+exports.selectArticleById = (id) =>{
+    return db.query(`SELECT * FROM articles WHERE article_id = ${id}`).then(({rows}) =>{
+        if (rows.length === 0){
+            return Promise.reject({
+                status: 404,
+                msg: "Couldn't find article"
+            })
+        }
+        return rows[0]
+    })
+}
