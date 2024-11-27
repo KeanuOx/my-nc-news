@@ -22,47 +22,63 @@ exports.selectArticleById = (id) =>{
 }
 
 exports.selectArticles = () =>{
-   const getArticles = () =>{ return db.query(`SELECT * FROM articles ORDER BY created_at DESC`).then(({rows}) =>{
-            rows.forEach((article) =>{
-            article.comment_count = 0
-            delete article.body
-        })
-        return rows
-    })
+return db.query(`SELECT 
+    articles.article_id,
+    articles.title,
+    articles.author,
+    articles.topic,
+    articles.created_at,
+    articles.votes,
+    articles.article_img_url,
+    COUNT(comments.comment_id)::int AS comment_count
+FROM articles
+LEFT JOIN comments ON comments.article_id = articles.article_id
+GROUP BY articles.article_id
+ORDER BY articles.created_at DESC;
+`).then(({rows})=>{
+    return rows
+})
 }
-    const getComments = () =>{ return db.query('SELECT * FROM comments').then(({rows}) => { 
+
+exports.selectArticleComments =  (article_id) =>{
+    return db
+    .query("SELECT * FROM articles WHERE article_id = $1;", [article_id])
+    .then((articleCheck) => {
+      if (articleCheck.rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "Not Found" });
+      }
+    
+    
+      return db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`,[article_id]).then(({rows}) =>{
         return rows
+        })
     })
+    
     }
-   return Promise.all([getArticles(),getComments()]).then((articlesAndComments)=>{
 
-        articlesAndComments[1].forEach((comment)=>{
-            articlesAndComments[0].forEach((article)=>{
-                let commentCount = 0 
-                if(comment.article_id === article.article_id){
-                    article.comment_count += 1
-                }
-            })
-        })
-        return(articlesAndComments[0])
+exports.insertComment = (article_id, username, body) => {
+    return db
+    .query("SELECT * FROM articles WHERE article_id = $1;", [article_id])
+    .then((articleCheck) => {
+      if (articleCheck.rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "Not Found" });
+      }
+
+      
+      return db.query(
+        `
+        INSERT INTO comments
+        (article_id, author, body, votes, created_at)
+        VALUES ($1, $2, $3, 0, NOW())
+        RETURNING *;
+        `,
+        [article_id, username, body]
+      );
     })
-}
-
-
-exports.selectArticleComments =  (id) =>{
-    return db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`,[id]).then(({rows}) =>{
-        if (rows.length === 0){
-            return Promise.reject({
-                status: 404,
-                msg: "Not found"
-            })
-        }
-    
-        return rows
-    })
-    
-
-}
+    .then(({rows}) => {
+      return rows[0];
+    });
+};
 
 
 
