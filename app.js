@@ -1,6 +1,6 @@
 const express = require("express")
 const endpoint = require("./endpoints.json")
-const { getTopics, getArticleById, getArticles } = require("./controller.js")
+const { getTopics, getArticleById, getArticles, getArticleComments } = require("./controller.js")
 app = express()
 const {
     handleCustomErrors,
@@ -19,12 +19,16 @@ app.get("/api/articles/:article_id", getArticleById)
 
 app.get("/api/articles", getArticles)
 
+app.get("/api/articles/:article_id/comments", getArticleComments)
+
 
 
 
 app.all('/*', (req,res) =>{
     res.status(404).send({ msg: 'Not found'})
 })
+
+
 
 app.use(handlePSQLErrors);
 app.use(handleCustomErrors);
