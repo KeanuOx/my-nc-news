@@ -100,6 +100,50 @@ describe("GET /api/articles", ()=>{
     })
   })
 })
+describe("GET /api/articles/:article_id/comments", () =>{
+  test("200: Responds with an array of all the comments for one article", () =>{
+    return request(app)
+    .get("/api/articles/3/comments")
+    .expect(200)
+    .then(({body}) =>{
+      const comments = body
+      expect(comments.length).toBe(2)
+      comments.forEach((comment) => {
+        expect(comment).toMatchObject({
+          comment_id: expect.any(Number),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          article_id: expect.any(Number)
+
+        })
+
+      })
+      expect(comments).toBeSortedBy("created_at", { descending: true, })
+
+    })
+    
+  })
+  test("400: Responds with an error message when the article id is invalid", () =>{
+    return request(app)
+    .get("/api/articles/invalid_id/comments")
+    .expect(400)
+    .then(({body}) => {
+      const error = body
+      expect(error.msg).toEqual("Bad Request")
+    })
+  })
+  test("404: Responds with an error message when the article provided doesn't exist", () =>{
+    return request(app)
+    .get("/api/articles/999/comments")
+    .expect(404)
+    .then(({body}) =>{
+      const error = body
+      expect(error.msg).toBe("Not found")
+    })
+  })
+})
 
 
 

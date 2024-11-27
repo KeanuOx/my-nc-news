@@ -1,4 +1,5 @@
-const { selectTopics, selectArticleById, selectArticles } = require("./model")
+const { selectTopics, selectArticleById, selectArticles, selectArticleComments } = require("./model")
+const checkArticleExists = require("./db/seeds/utils")
 
 
 exports.getTopics = (req, res, next) => {
@@ -16,17 +17,25 @@ exports.getArticleById = (req, res ,next) =>{
     selectArticleById(article_id).then((article) =>{
         res.status(200).send({article})
     })
-    .catch((err)=>{
-        next(err)
-    })
+    .catch(next)
 
 }
 
 exports.getArticles = (req, res, next) => {
     selectArticles().then((articles)=>{
         res.status(200).send({articles})
+
     })
-    .catch((err)=>{
-        next(err)
-    })
+    .catch(next)
+}
+
+exports.getArticleComments = (req, res, next) =>{
+   const {article_id} = req.params
+   selectArticleComments(article_id).then((comments) =>{
+    console.log(comments)
+    res.status(200).send((comments))
+   })
+   .catch(next)
+    
+
 }
