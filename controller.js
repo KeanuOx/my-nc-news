@@ -1,4 +1,4 @@
-const { selectTopics, selectArticleById, selectArticles, selectArticleComments, insertComment } = require("./model")
+const { selectTopics, selectArticleById, selectArticles, selectArticleComments, insertComment, updateArticleVotes } = require("./model")
 const checkArticleExists = require("./db/seeds/utils")
 
 
@@ -47,4 +47,18 @@ exports.postNewComment = (req, res, next) =>{
         res.status(201).send(newComment)
     })
     .catch(next)
+}
+
+exports.patchArticle = (req, res, next) =>{
+    const {article_id} = req.params
+    const {inc_votes} = req.body
+    if (!inc_votes) {
+        return next({status: 400, msg: "Bad Request"})
+    }
+    updateArticleVotes(article_id, inc_votes)
+        .then((updatedArticle) => {
+            res.status(200).send(updatedArticle);
+        })
+        .catch(next);
+
 }
