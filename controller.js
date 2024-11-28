@@ -1,4 +1,4 @@
-const { selectTopics, selectArticleById, selectArticles, selectArticleComments } = require("./model")
+const { selectTopics, selectArticleById, selectArticles, selectArticleComments, insertComment } = require("./model")
 const checkArticleExists = require("./db/seeds/utils")
 
 
@@ -32,10 +32,19 @@ exports.getArticles = (req, res, next) => {
 exports.getArticleComments = (req, res, next) =>{
    const {article_id} = req.params
    selectArticleComments(article_id).then((comments) =>{
-    console.log(comments)
     res.status(200).send((comments))
    })
    .catch(next)
-    
+}
 
+exports.postNewComment = (req, res, next) =>{
+    const {article_id} = req.params
+    const { username, body } = req.body
+    if (!username || !body) {
+        return next({ status: 400, msg: "Bad Request" });
+      }
+    insertComment(article_id, username, body).then((newComment) =>{
+        res.status(201).send(newComment)
+    })
+    .catch(next)
 }

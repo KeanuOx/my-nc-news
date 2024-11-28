@@ -93,8 +93,8 @@ describe("GET /api/articles", ()=>{
           votes: expect.any(Number),
           article_img_url: expect.any(String),
           comment_count: expect.any(Number),
-
         })
+        expect(article).not.toHaveProperty("body")
       })
       expect(articles).toBeSortedBy("created_at", { descending: true, })
     })
@@ -140,10 +140,73 @@ describe("GET /api/articles/:article_id/comments", () =>{
     .expect(404)
     .then(({body}) =>{
       const error = body
-      expect(error.msg).toBe("Not found")
+      expect(error.msg).toBe("Not Found")
     })
   })
 })
+describe("POST /api/articles/:article_id/comments", () =>{
+  test("201: Adds a comment to an article and responds with the new comment", ()=>{
+    const newComment = {
+      username: "butter_bridge",
+      body: "This is a test comment",
+    };
+    return request(app)
+    .post("/api/articles/1/comments")
+    .send(newComment)
+    .expect(201)
+    .then(({_body}) =>{
+      const comment = _body
+      
+      expect(comment).toMatchObject({
+        comment_id: expect.any(Number),
+        article_id: 1,
+        author: "butter_bridge",
+        body: "This is a test comment",
+        votes: 0,
+        created_at: expect.any(String),
+      });
+    })
+  })
+  test("400: Responds with an error when the username is missing", () => {
+    const incompleteComment = {
+      body: "This is a test comment without a username",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(incompleteComment)
+      .expect(400)
+      .then(({body})=>{
+        expect(body.msg).toBe("Bad Request");
+      })
+  });
+  test("400: Responds with an error when the body is missing", () => {
+    const incompleteComment = {
+      username: "butter_bridge",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(incompleteComment)
+      .expect(400)
+      .then(({body})=>{
+        expect(body.msg).toBe("Bad Request");
+      })
+  });
+  test("404: Responds with an error when the article_id does not exist", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "This is a test comment",
+    };
+  
+    return request(app)
+      .post("/api/articles/9999/comments")
+      .send(newComment)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not Found");
+      });
+  });
+
+
 
 
 
@@ -159,10 +222,13 @@ describe("GET /api/articles/:article_id/comments", () =>{
   describe("Not found error", () =>{
   test("404: responds with not found when the given path isn't available", () => {
     return request(app)
-    .get("/api/topi")
+    .get("/api/invalid-endpoint")
     .expect(404)
     .then((response) => {
       expect(response.body).toEqual({msg: "Not found"})
     })
   });
+})
+
+
 })
