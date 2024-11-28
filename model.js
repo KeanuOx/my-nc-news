@@ -56,6 +56,9 @@ exports.selectArticleComments =  (article_id) =>{
     }
 
 exports.insertComment = (article_id, username, body) => {
+  if (!username || !body) {
+    return Promise.reject({ status: 400, msg: "Bad Request" });
+  }
     return db
     .query("SELECT * FROM articles WHERE article_id = $1;", [article_id])
     .then((articleCheck) => {
@@ -80,6 +83,9 @@ exports.insertComment = (article_id, username, body) => {
 };
 
 exports.updateArticleVotes = (article_id, inc_votes) => {
+  if (!inc_votes) {
+    return Promise.reject({ status: 400, msg: "Bad Request" })
+}
   return db
     .query(
       `
@@ -98,6 +104,23 @@ exports.updateArticleVotes = (article_id, inc_votes) => {
     });
 };
 
-    
+
+exports.removeComment = (comment_id) =>{
+  if (!comment_id){
+    return Promise.reject({ status: 400, msg: "Bad Request" })
+
+  }
+  return db
+    .query("SELECT * FROM comments WHERE comment_id = $1;", [comment_id])
+    .then((commentCheck) => {
+      if (commentCheck.rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "Not Found" });
+      }
+  return db.query(`DELETE FROM comments WHERE comment_id = $1`,[comment_id])
+  .then(()=>{
+    return({})
+  })
+})
+}
       
 

@@ -113,8 +113,16 @@
             }
           }
     
-        }
-
+        },
+        
+          "DELETE /api/comments/:comment_id": {
+            "description": "Deletes the comment specified by the given comment_id.",
+            "queries": [],
+            "exampleResponse": {
+              "status": 204,
+              "content": "No content"
+            }
+          }
 
 
 }

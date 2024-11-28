@@ -1,4 +1,4 @@
-const { selectTopics, selectArticleById, selectArticles, selectArticleComments, insertComment, updateArticleVotes } = require("./model")
+const { selectTopics, selectArticleById, selectArticles, selectArticleComments, insertComment, updateArticleVotes, removeComment } = require("./model")
 const checkArticleExists = require("./db/seeds/utils")
 
 
@@ -40,9 +40,6 @@ exports.getArticleComments = (req, res, next) =>{
 exports.postNewComment = (req, res, next) =>{
     const {article_id} = req.params
     const { username, body } = req.body
-    if (!username || !body) {
-        return next({ status: 400, msg: "Bad Request" });
-      }
     insertComment(article_id, username, body).then((newComment) =>{
         res.status(201).send(newComment)
     })
@@ -52,9 +49,7 @@ exports.postNewComment = (req, res, next) =>{
 exports.patchArticle = (req, res, next) =>{
     const {article_id} = req.params
     const {inc_votes} = req.body
-    if (!inc_votes) {
-        return next({status: 400, msg: "Bad Request"})
-    }
+    
     updateArticleVotes(article_id, inc_votes)
         .then((updatedArticle) => {
             res.status(200).send(updatedArticle);
@@ -62,3 +57,12 @@ exports.patchArticle = (req, res, next) =>{
         .catch(next);
 
 }
+
+exports.deleteComment = (req, res, next) =>{
+    const {comment_id} = req.params
+    removeComment(comment_id)
+    .then(()=>{
+        res.status(204).send({})
+    })
+    .catch(next)
+}   
