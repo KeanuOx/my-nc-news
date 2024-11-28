@@ -40,9 +40,6 @@ exports.getArticleComments = (req, res, next) =>{
 exports.postNewComment = (req, res, next) =>{
     const {article_id} = req.params
     const { username, body } = req.body
-    if (!username || !body) {
-        return next({ status: 400, msg: "Bad Request" });
-      }
     insertComment(article_id, username, body).then((newComment) =>{
         res.status(201).send(newComment)
     })
@@ -52,9 +49,7 @@ exports.postNewComment = (req, res, next) =>{
 exports.patchArticle = (req, res, next) =>{
     const {article_id} = req.params
     const {inc_votes} = req.body
-    if (!inc_votes) {
-        return next({status: 400, msg: "Bad Request"})
-    }
+    
     updateArticleVotes(article_id, inc_votes)
         .then((updatedArticle) => {
             res.status(200).send(updatedArticle);

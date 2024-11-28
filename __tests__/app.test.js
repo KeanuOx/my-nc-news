@@ -191,6 +191,21 @@ describe("POST /api/articles/:article_id/comments", () =>{
         expect(body.msg).toBe("Bad Request");
       })
   });
+  test("400: Responds with an error message when the article id is invalid", () =>{
+    const newComment = {
+      username: "butter_bridge",
+      body: "This is a test comment",
+    };
+    return request(app)
+    .post("/api/articles/invalid_id/comments")
+    .send(newComment)
+    .expect(400)
+    .then(({body}) => {
+      const error = body
+      expect(error.msg).toEqual("Bad Request")
+    })
+  })
+
   test("404: Responds with an error when the article_id does not exist", () => {
     const newComment = {
       username: "butter_bridge",
