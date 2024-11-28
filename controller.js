@@ -1,4 +1,4 @@
-const { selectTopics, selectArticleById, selectArticles, selectArticleComments, insertComment, updateArticleVotes } = require("./model")
+const { selectTopics, selectArticleById, selectArticles, selectArticleComments, insertComment, updateArticleVotes, removeComment } = require("./model")
 const checkArticleExists = require("./db/seeds/utils")
 
 
@@ -57,3 +57,12 @@ exports.patchArticle = (req, res, next) =>{
         .catch(next);
 
 }
+
+exports.deleteComment = (req, res, next) =>{
+    const {comment_id} = req.params
+    removeComment(comment_id)
+    .then(()=>{
+        res.status(204).send({})
+    })
+    .catch(next)
+}   
