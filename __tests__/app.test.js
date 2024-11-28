@@ -205,6 +205,75 @@ describe("POST /api/articles/:article_id/comments", () =>{
         expect(response.body.msg).toBe("Not Found");
       });
   });
+})
+
+describe("PATCH /api/articles/:article_id", () =>{
+  test("200: Updates votes for the article and responds with the updated article", () => {
+    const newVote = { inc_votes: 10 };
+  
+    return request(app)
+      .patch("/api/articles/1")
+      .send(newVote)
+      .expect(200)
+      .then(({body}) => {
+        const article  = body;
+        expect(article).toMatchObject({
+          article_id: 1,
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: 110,
+          article_img_url: expect.any(String),
+        });
+      });
+  });
+  test("400: Responds with an error when `inc_votes` is missing", () => {
+    const invalidVote = {};
+  
+    return request(app)
+      .patch("/api/articles/1")
+      .send(invalidVote)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad Request");
+      });
+  });
+  test("400: Responds with an error when body is not a number", () => {
+    const invalidVote = { inc_votes: "not-a-number" };
+  
+    return request(app)
+      .patch("/api/articles/1")
+      .send(invalidVote)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad Request");
+      });
+  });
+  test("400: Responds with an error when article_id is invalid", () => {
+    const newVote = { inc_votes: 5 };
+  
+    return request(app)
+      .patch("/api/articles/not-a-number")
+      .send(newVote)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad Request");
+      });
+  });
+  test("404: Responds with an error when article_id does not exist", () => {
+    const newVote = { inc_votes: 5 };
+  
+    return request(app)
+      .patch("/api/articles/9999")
+      .send(newVote)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not Found");
+      });
+  });
+})
 
 
 
@@ -218,8 +287,7 @@ describe("POST /api/articles/:article_id/comments", () =>{
 
 
 
-
-  describe("Not found error", () =>{
+describe("Not found error", () =>{
   test("404: responds with not found when the given path isn't available", () => {
     return request(app)
     .get("/api/invalid-endpoint")
@@ -231,4 +299,4 @@ describe("POST /api/articles/:article_id/comments", () =>{
 })
 
 
-})
+
