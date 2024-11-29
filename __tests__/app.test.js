@@ -99,6 +99,67 @@ describe("GET /api/articles", ()=>{
       expect(articles).toBeSortedBy("created_at", { descending: true, })
     })
   })
+  test("200: Responds with an array of all the articles with all the correct properties, sorted by the date created in descending order", ()=>{
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then(({body}) =>{
+      const articles = body.articles
+      expect(articles).toHaveLength(13)
+      articles.forEach((article)=>{
+        expect(article).toMatchObject({
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: expect.any(Number),
+          topic: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: expect.any(Number),
+        })
+        expect(article).not.toHaveProperty("body")
+      })
+      expect(articles).toBeSortedBy("created_at", { descending: true, })
+    })
+  })
+  test("200: Sorts articles by a valid column in ascending order when order=asc is provided", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        const {articles} = body;
+        expect(articles).toBeSortedBy("title", { descending: false });
+      });
+  });
+
+  test("200: Sorts articles by votes in descending order when sort_by=votes is provided", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes")
+      .expect(200)
+      .then(({ body }) => {
+        const {articles} = body;
+        expect(articles).toBeSortedBy("votes", { descending: true });
+      });
+  });
+
+  test("400: Responds with an error when sort_by is an invalid column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=invalid_column")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+
+  test("400: Responds with an error when order is invalid", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=invalid_order")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+
 })
 describe("GET /api/articles/:article_id/comments", () =>{
   test("200: Responds with an array of all the comments for one article", () =>{
