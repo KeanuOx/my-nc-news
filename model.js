@@ -8,17 +8,37 @@ exports.selectTopics = () => {
     })
 }
 
-exports.selectArticleById = (id) =>{
-    return db.query(`SELECT * FROM articles WHERE article_id = $1`,[id]).then(({rows}) =>{
-        if (rows.length === 0){
-            return Promise.reject({
-                status: 404,
-                msg: "Not found"
-            })
-        }
-        return rows[0]
-    })
-}
+exports.selectArticleById = (id) => {
+  return db
+    .query(
+      `
+      SELECT
+        articles.article_id,
+        articles.body,
+        articles.title,
+        articles.author,
+        articles.topic,
+        articles.created_at,
+        articles.votes,
+        articles.article_img_url,
+        COUNT(comments.comment_id)::int AS comment_count 
+      FROM articles
+      LEFT JOIN comments ON comments.article_id = articles.article_id
+      WHERE articles.article_id = $1
+      GROUP BY articles.article_id;
+      `,
+      [id]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "Not found",
+        });
+      }
+      return rows[0];
+    });
+};
 
 exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
   const validSortBy = ["article_id", "title", "author", "topic", "created_at", "votes", "article_img_url"];
@@ -61,6 +81,7 @@ exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
                   if (rows.length === 0) {
                       return Promise.reject({ status: 404, msg: "Not Found" });
                   }
+                  return []
               });
       }
       return rows;

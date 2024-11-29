@@ -53,6 +53,7 @@ describe("GET /api/articles/:article_id", () =>{
       expect(article.created_at).toBe("2020-07-09T20:11:00.000Z")
       expect(article.votes).toBe(data.articleData[0].votes)
       expect(article.article_img_url).toBe(data.articleData[0].article_img_url)
+      expect(article.comment_count).toBe(11)
      })
   })
   test("400: Responds with an error message when the article id is invalid", () =>{
@@ -154,7 +155,7 @@ describe("GET /api/articles/:article_id/comments", () =>{
           author: expect.any(String),
           body: expect.any(String),
           article_id: expect.any(Number)
-
+          
         })
 
       })
@@ -387,6 +388,15 @@ describe("GET /api/users", () =>{
           articles.forEach((article) => {
             expect(article.topic).toBe("mitch");
           });
+        });
+    });
+    test("200: Responds with an empty array when the topic exists but has no articles", () => {
+      return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toEqual([]);
         });
     });
     test("404: Responds with an error when the topic does not exist", () => {
