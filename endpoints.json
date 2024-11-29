@@ -123,7 +123,8 @@
               "content": "No content"
             }
           },
-          "GET /api/users": {
+    
+    "GET /api/users": {
     "description": "serves an array of all users",
     "queries": [],
     "exampleResponse": {
