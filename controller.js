@@ -1,5 +1,5 @@
 const { selectTopics, selectArticleById, selectArticles, selectArticleComments, insertComment, updateArticleVotes, removeComment, selectUsers } = require("./model")
-const checkArticleExists = require("./db/seeds/utils")
+
 
 
 exports.getTopics = (req, res, next) => {
@@ -22,7 +22,8 @@ exports.getArticleById = (req, res ,next) =>{
 }
 
 exports.getArticles = (req, res, next) => {
-    selectArticles().then((articles)=>{
+    const { sort_by, order } = req.query
+    selectArticles(sort_by, order).then((articles)=>{
         res.status(200).send({articles})
 
     })
