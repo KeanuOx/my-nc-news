@@ -1,5 +1,6 @@
 const express = require("express")
 const endpoint = require("./endpoints.json")
+const cors = require('cors');
 const { getTopics, getArticleById, getArticles, getArticleComments, postNewComment, patchArticle, deleteComment, getUsers } = require("./controller.js")
 app = express()
 const {
@@ -9,6 +10,7 @@ const {
   } = require("./errors.js");
 
 app.use(express.json());
+app.use(cors());
 
 
 app.get("/api", (req, res) => {
