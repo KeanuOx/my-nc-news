@@ -41,7 +41,7 @@ exports.selectArticleById = (id) => {
 };
 
 exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
-  const validSortBy = ["article_id", "title", "author", "topic", "created_at", "votes", "article_img_url"];
+  const validSortBy = ["article_id", "title", "author", "topic", "created_at", "votes", "article_img_url", "comment_count"];
   const validOrder = ["asc", "desc"];
   const queryValues = [];
   let sqlQuery = `
