@@ -104,32 +104,36 @@ exports.selectArticleComments =  (article_id) =>{
     
     }
 
-exports.insertComment = (article_id, username, body) => {
-  if (!username || !body) {
-    return Promise.reject({ status: 400, msg: "Bad Request" });
-  }
-    return db
-    .query("SELECT * FROM articles WHERE article_id = $1;", [article_id])
-    .then((articleCheck) => {
-      if (articleCheck.rows.length === 0) {
-        return Promise.reject({ status: 404, msg: "Not Found" });
+    exports.insertComment = (article_id, username = "current_user", body) => {
+      if (!body) {
+        return Promise.reject({ status: 400, msg: "Bad Request" });
       }
-
-      
-      return db.query(
-        `
-        INSERT INTO comments
-        (article_id, author, body, votes, created_at)
-        VALUES ($1, $2, $3, 0, NOW())
-        RETURNING *;
-        `,
-        [article_id, username, body]
-      );
-    })
-    .then(({rows}) => {
-      return rows[0];
-    });
-};
+    
+      return db
+        .query(
+          "INSERT INTO users (username, name, avatar_url) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING;",
+          [username, "Default User", "https://default-avatar.com/avatar.png"]
+        )
+        .then(() => {
+          return db.query("SELECT * FROM articles WHERE article_id = $1;", [article_id]);
+        })
+        .then((articleCheck) => {
+          if (articleCheck.rows.length === 0) {
+            return Promise.reject({ status: 404, msg: "Not Found" });
+          }
+    
+          return db.query(
+            `
+            INSERT INTO comments
+            (article_id, author, body, votes, created_at)
+            VALUES ($1, $2, $3, 0, NOW())
+            RETURNING *;
+            `,
+            [article_id, username, body]
+          );
+        })
+        .then(({ rows }) => rows[0]);
+    };
 
 exports.updateArticleVotes = (article_id, inc_votes) => {
   if (!inc_votes) {

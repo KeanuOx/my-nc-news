@@ -206,18 +206,6 @@ describe("POST /api/articles/:article_id/comments", () =>{
       });
     })
   })
-  test("400: Responds with an error when the username is missing", () => {
-    const incompleteComment = {
-      body: "This is a test comment without a username",
-    };
-    return request(app)
-      .post("/api/articles/1/comments")
-      .send(incompleteComment)
-      .expect(400)
-      .then(({body})=>{
-        expect(body.msg).toBe("Bad Request");
-      })
-  });
   test("400: Responds with an error when the body is missing", () => {
     const incompleteComment = {
       username: "butter_bridge",
